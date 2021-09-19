@@ -1,0 +1,7 @@
+#!/bin/bash
+
+./genzipf 100000000 "zipf0.6" 0.6
+./genzipf 100000000 "zipf0.8" 0.8
+./genzipf 100000000 "zipf1.0" 1.0
+./genzipf 100000000 "zipf1.2" 1.2
+./genzipf 100000000 "zipf1.4" 1.4

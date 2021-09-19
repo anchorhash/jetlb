@@ -1,0 +1,6 @@
+pylru==1.2.0
+numpy==1.19.3
+scapy==2.4.4
+sortedcontainers==2.3.0
+setuptools==41.2.0
+xxhash==2.0.0
