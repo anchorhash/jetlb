@@ -36,9 +36,9 @@ This repository contains the code used to create the figures for the evaluation 
    ```bash
    python3 run_example.py
    ```
-   - This script runs a single run of the simulation; namely, a single point in our figures. Note that, running the full simulations may take several days. During the run, the progress of the simulation as well as additional data are printed to the standard output
-   - Once the simulation is complete (may take 1-2 hours), the results of this run can be examined in `simulations/even-driven/results/anchor_example.txt`. This file shows: 
-   - The results of this run can be examined in `simulations/even-driven/results/anchor_example.txt`. This file shows:
+   - This script runs a single run of the simulation; namely, a single point in our figures (hardcoded). During the run, the progress of the simulation as well as additional data are printed to the standard output
+   - Once the simulation is complete (may take 1-2 hours), the results of this run can be examined in `simulations/event-driven/results/anchor_example.txt`. This file shows: 
+ 
      ```
      ****************************************************************************************************
      Parameters: ch_type:anchor, num_horizon:70, no_server_tag_recycling:False, num_servers:468, lru_size:25000, seed:12345, capacity:936, replicas:300, num_keys:1000000, connection_target:100000, update_rate:10.0, simulation_time:1000, file_name:anchor_example, 
@@ -63,7 +63,7 @@ This repository contains the code used to create the figures for the evaluation 
     popd
     ```
     - this creates figure 3 as `result/anchor_fig3.pdf`
-    - as mentioned, a full run may take several days
+    - a full run may take several days
     - to reduce run time, edit `run_fig3.py`, line 13: reduce `connection_target_list` from `100K` to `10K` or even `1K` (the latter should run in less than two hours). The results will still reflect the same trends that are presented in the paper, but absolute numbers would be different.
  4. Reproduce figures 4a, 4b, and 5
     - same as for figure 3, just replace with the corresponding numbered scripts
