@@ -158,7 +158,9 @@ This repository contains the code used to create the figures for the evaluation 
      ```bash
      python3 plot_table.py --result_fn toy --trials 3
      ```
-
+5. The real traces we used are external artifacts: 
+   - UNI1: Data Set for IMC 2010 Data Center Measurement. http://pages.cs.wisc.edu/~tbenson/IMC10_Data.html, 2010. 
+   - CAIDA: The CAIDA equinix-newyork packet trace, 20181220-130000, 2018.
 
 # Algorithm
 
