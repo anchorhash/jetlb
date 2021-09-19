@@ -82,7 +82,7 @@ This repository contains the code used to create the figures for the evaluation 
    - To create the synthetic traces
      ```bash
      make
-     ./gentzipf_bash
+     bash gentzipf_bash
      ```
    
 3. Reproduce figure 6b
