@@ -64,10 +64,11 @@ This repository contains the code used to create the figures for the evaluation 
     ```
     - this creates figure 3 as `result/anchor_fig3.pdf`
     - a full run may take several days
-    - to reduce run time, edit `run_fig3.py`, line 13: reduce `connection_target_list` from `100K` to `10K` or even `1K` (the latter should run in less than two hours). The results will still reflect the same trends that are presented in the paper, but absolute numbers would be different.
+    - to reduce run time, edit `run_fig3.py`, line 13: reduce `connection_target_list` from `100K` to `10K` or even `1K` (the latter should run in less than two hours). The results will still reflect the same trends that are presented in the paper, but absolute numbers would be different. Also, change the `connection_rate` parameter in `plot_fig3.py` (line 18) to be equal to `connection_target_list`   
  4. Reproduce figures 4a, 4b, and 5
     - same as for figure 3, just replace with the corresponding numbered scripts
     - same as for figure 3, run time may be reduced by adjusting `connection_target_list`
+    - same as for figure 3, set the `connection_rate` parameter in `plot_fig4a.py` (line 19) to be equal to `connection_target_list`  
 
 ## Synthetic traces
 1. Compile JET C++
