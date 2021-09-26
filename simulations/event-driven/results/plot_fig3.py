@@ -15,8 +15,8 @@ update_rates = [1, 2, 5, 10, 20, 40]
 os.system('python3 parse_fig3.py > anchor_fig3.csv')
 data = pd.read_csv("anchor_fig3.csv")
 
-# connection_rate = 100000
-connection_rate = 1000
+connection_rate = 100000
+# connection_rate = 1000
 
 data = data[data['connection_target'] == connection_rate]
 num_horizon = 47
