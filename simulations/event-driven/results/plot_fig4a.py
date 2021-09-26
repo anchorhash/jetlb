@@ -16,8 +16,9 @@ data = pd.read_csv("anchor_fig4a.csv")
 
 markers = [">", "<", "^", "v", "o"]
 
-# connection_rate = 100000
-connection_rate = 1000
+connection_rate = 100000
+# connection_rate = 1000
+
 data = data[data['connection_target'] == connection_rate]
 
 update_rate = 10
