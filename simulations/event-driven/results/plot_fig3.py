@@ -49,7 +49,8 @@ for w, update_rate in enumerate(update_rates):
     ax.bar(labels_range + -width*len(update_rates)/2 + (w+0.5)*width,
            cdata['FCT broken connections'],
            label='Full CT (Update rate {})'.format(update_rate),
-           width = width, hatch=hatch, fill=True, edgecolor='black')
+           width = width, hatch=hatch, fill=True, edgecolor='black',
+           color=plt.get_cmap('Pastel1').colors[w])
 
 for w, update_rate in enumerate(update_rates):
     cdata = data[data['update_rate'] == update_rate]
