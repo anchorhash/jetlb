@@ -43,7 +43,7 @@ for w, update_rate in enumerate(update_rates):
 
     for x, y in zip(labels_range - width*len(update_rates)/2.0 + w*width,
                     cdata['FCT broken connections']):
-        ax.text(x + width/10, y + 3000, y, color='black', rotation=90, fontsize=10)
+        ax.text(x + width/10, y + 1000, y, color='black', rotation=90, fontsize=10)
 
     hatch=hpatterns[w]
     ax.bar(labels_range + -width*len(update_rates)/2 + (w+0.5)*width,
