@@ -13,9 +13,9 @@ We implemented JET in two different environments and with four different consist
 ## Code
 This repository contains the code used to create the figures for the evaluation section in the paper.
 
-- `cpp-jetlb` is a C++ implementation of JET
-- `py-jetlb` is a Python implemenation of JET
-- `simulation` contains the code to create the figures from 3 types of evaluations
+- [`cpp-jetlb`](cpp-jetlb) is a C++ implementation of JET
+- [`py-jetlb`](py-jetlb) is a Python implemenation of JET
+- [`simulations`](simulations) contains the code to create the figures from 3 types of evaluations
   - Event-driven simulation
   - Sythetic traces
   - Real-traces
