@@ -8,49 +8,80 @@ JET implemented with different consistent hashes:
 
 ## Jet API
 
-All implementations share the same API, as explained in the paper.
-All implementations use an LRU cache as the connection tracking module.
+All implementations share the same API, excpet initialization (see below).  
+All implementations use an LRU cache as the connection tracking module (i.e., a table of fixed size that uses an LRU eviction policy).
 
 ### `get_destination`
-Computes a destination for a connection with a given id (e.g., 5-tuple)
+Computes a destination for a connection with a given id (e.g., 5-tuple).
 
+This is the main function of Jet.  
+It firsts checks if the connection id is already known and tracked in the connection tracking module.  
+If so, it returns the tracked destination (to maintain PCC).  
+Otherwise, it computes the destination (among current worker servers) based on a consistent hash of the connection ID.  
+Jet selectively decides whether to track the connection, based on the horizon.
+```python
+def get_destination(self, connection_id)
+```
 #### Arguments:
 `connection_id`: String representing a unique id of the connection
 #### Returns:
-Server id
+String represting a unique id of the destination server
 
 
 ### `add_working_server`
-Adds a worker server from the horizon set.
-Must be in the horizon set.
+Adds a worker server from the horizon set
 
+- The added server must be in the horizon set (and is automatically removed from it)
+- The added server should have in the horizon set for a warm-up period.
+```python
+def add_working_server(self, server)
+```
 #### Arguments:
 `server`: String representning a unique id of the server
+
 
 ### `remove_working_server`
-Removes a worker server to the horizion set.
-Must be in the worker set.
+Removes a worker server
 
+- The removed server must be in the worker set.
+- The removed server is automatically added to the horizon set. 
+```python
+def remove_working_server(self, server)
+```
 #### Arguments:
 `server`: String representning a unique id of the server
+
 
 ### `add_horizon_server`
 Adds a new server to the horizon set (warmup for a new server in the system).
-Must not be in either the worker or horizon sets.
 
+- The added server must not be in either the worker or horizon sets.
+```python
+def add_horizon_server(self, server)
+```
 #### Arguments:
 `server`: String representning a unique id of the server
+
 
 ### `remove_horizon_server`
 Removes a server from the horizon set (remove permamnently).
-Must be in the horizon set.
 
+- The removed server must be in the horizon set.
+```python
+def remove_horizon_server(self, server)
+```
 #### Arguments:
 `server`: String representning a unique id of the server
+
 
 ### `remove_connection`
 Stop tracking a connection (e.g., upon FIN)
 
+- This deletes the connection information from the connection tracking module (if it was tracked).
+- This implementation employs an LRU eviction policy. Caller may remove stale connections explicitly.
+```python
+def remove_connection(self, connection_id)
+```
 #### Arguments:
 `connection_id`: String representning a unique id of the connection
 
@@ -67,26 +98,41 @@ Stop tracking a connection (e.g., upon FIN)
 
 
 ### anchorhash (`jet_anchorhash.JetAnchorHash`)
-Jet implementations using AnchorHash as the consistent hash module
-
+A Jet implementation using AnchorHash as the consistent hash module
+```python
+def __init__(self, workers, horizon, lru_size, capacity=100, seed=42)
+```
 #### Arguments:
 `capacity`: (optinal, default:`100`) Int maximal number of servers (both horizon and workers set)
 
-### hrw JetHRW (`jet_hrw.JetHRW`)
-Jet implementation using Highest Random Weight (HRW) as the consistent hash module
 
+### hrw JetHRW (`jet_hrw.JetHRW`)
+A Jet implementation using Highest Random Weight (HRW) as the consistent hash module
+```python
+def __init__(self, workers, horizon, lru_size, seed=42)
+```
 #### Arguments:
 none
 
-### ring (`jet_ring.JetRing`)
-Jet implementation using Ring as the consistent hash module
 
+### ring (`jet_ring.JetRing`)
+A Jet implementation using Ring as the consistent hash module
+```python
+def __init__(self, workers, horizon, lru_size, replicas=100, seed=42)
+```
 #### Arguments:
 replicas: (optinal, default:`100`) Int number of virtual nodes for each server on the ring
 
-### table_hrw (`jet_table.JetTableHRW`)
-Jet implementation using a table-based HRW as the consistent hash module (table is filled using HRW)
 
+### table_hrw (`jet_table.JetTableHRW`)
+A Jet implementation using a table-based HRW as the consistent hash module (table is filled using HRW)
+
+- This implementation maintains a fixed size lookup table, using HRW consistent hash to set the destination server for each table row.
+  A (standard) hash is used to map each connection id to a table row; then the row value determines the connection's destination.
+  After every change in the worker set, Jet updates the detination only for the affected table rows (typical table-based consistent hashes recompute the entire table).
+```python
+def __init__(self, workers, horizon, lru_size, table_size=1000, seed=42)
+```
 #### Arguments:
 table_size: (optinal, default:`1000`) Int size of the table
     
