@@ -1,75 +1,83 @@
 # Jet C++ implementation
 
-JET implemented with different consistent hashes:
+Jet is implemented with different consistent hashes:
 1. AnchorHash
 2. Table-based HRW 
 
 ## Jet API
 
-- All implementations share the API explained in the paper.
+- All implementations share the same API.
 - All implementations use `robin_hood::unordered_map` as the connection tracking module.
-- All implementations use `FiveTuple` and `FiveTupleHasher` (in `defs.h`) to represent unique ids (both for connections and servers).
+- All implementations use `FiveTuple` and `FiveTupleHasher` structs (defined in `defs.h`) to represent unique ids (both for connections and servers).
 
 
-## Jet Anchorhash (in `jet_anchor`)
-- Jet implementations using AnchorHash as the consistent hash module.
-- With this implementation the _caller must maintain a fixed-size horizon set_. 
+## Jet Anchorhash (in folder `jet_anchor`)
+- A Jet implementation using AnchorHash as the consistent hash module.
+- With this implementation the _caller must maintain the horizon set_ and declare the _maximal horizon size_ at initialization.
   
 ### Constructor 
-```cpp
+```C++
 Jet::Jet(vector<FiveTuple> servers, int capacity, int horizon, int seed, bool baseline)
 ```
 #### Arguments:
 - `servers`: vector of worker server ids
 - `capacity`: maximal number of servers (workers and horizon)
-- `horizon`: size of horizon
+- `horizon`: maximal size of horizon (horizon set is maintained by the caller)
 - `seed`:  seed for random generators (for reproducability)
 - `baseline`: should be `false` (otherwise full connection tracking is used instead of Jet)  
 
 ### Get Server
-```cpp
+```C++
 const FiveTuple Jet::GetServer(const FiveTuple& connID)
 ```
-Computes a destination for a connection with a given id
+Computes a destination for a connection with a given id.
+
+This is the main function of Jet. It firsts checks if the connection id is already known and tracked in the connection tracking module. If so, it returns the tracked destination (to maintain PCC). Otherwise, it computes the destination (among current worker servers) based on a consistent hash (AnchorHash) of the connection ID. Jet selectively decides whether to track the connection, based on the horizon.
 #### Arguments:
 `connID`: unique id of the connection
 #### Returns:
 Server id
 
 ### Add Server
-```cpp
+```C++
 void Jet::AddServer(const FiveTuple& server)
 ```
 - Adds a worker server.
-- Caller must make sure that the added server is in the horizon set and remove it from the horizon set.
-- Caller must add a new server to the horizon set to keep a fixed-size horizon.
+- The added server should have been in the horizon set for a warmup period.
+- Caller must remove the added server from the horizon set before calling this function.
+- Caller may add a new server to the horizon set to replace the added server.
 #### Arguments:
 `server`: unique id of the server
 
 ### Remove Server
-```cpp
+```C++
 void Jet::RemoveServer(const FiveTuple& server)
 ```
 - Removes a worker server.
-- Caller must move the server to the horizon set and remove one server permanently to keep a fixed-size horizon.
 - Server must be in the worker set.
+- Caller may add the removed server to the horizon set, provided its current size is less than the declared maximal size.
 #### Arguments:
 `server`: String representning a unique id of the server
 
 ### Remove Connection
-```cpp
+```C++
 void Jet::RemoveConnection(const FiveTuple& connID)
 ```
-Stop tracking a connection (e.g., upon FIN)
+- Stop tracking a connection (e.g., upon FIN).
+- This deletes the connection information from the connection tracking module (if it was tracked).
+- This implementation does _not_ employ any eviction policy. Caller must remove stale connections explicitly.
 #### Arguments:
 `connID`: String representning a unique id of the connection
 
 
-## Jet HRW (in `jet_hrw`)
-- Jet implementation using table-based Highest Random Weight (HRW) as the consistent hash module
+## Jet HRW (in folder `jet_hrw`)
+- A Jet implementation using table-based Highest Random Weight (HRW) as the consistent hash module.
+- This implementation maintains a fixed size lookup table, using HRW consistent hash to set the destination server for each table row.  
+  A (standard) hash is used to map each connection id to a table row; then the row value determines the connection's destination.  
+  After every change in the worker set, Jet updates the detination only for the affected table rows (typical table-based consistent hashes recompute the entire table). 
 
 ### Constructor 
-```cpp
+```C++
 JetHRW::JetHRW(vector<FiveTuple> workers, vector<FiveTuple> horizon, int capacity, int seed, bool baseline)
 ```
 #### Arguments:
@@ -80,21 +88,24 @@ JetHRW::JetHRW(vector<FiveTuple> workers, vector<FiveTuple> horizon, int capacit
 - `baseline`: should be `false` (otherwise full connection tracking is used instead of Jet)  
 
 ### Get Server
-```cpp
+```C++
 const FiveTuple JetHRW::GetServer(const FiveTuple& connID)
 ```
-Computes a destination for a connection with a given id
+Computes a destination for a connection with a given id.
+
+This is the main function of Jet. It firsts checks if the connection id is already known and tracked in the connection tracking module. If so, it returns the tracked destination (to maintain PCC). Otherwise, it computes the destination (among current worker servers) based on a consistent hash (table-based HRW) of the connection ID. Jet selectively decides whether to track the connection, based on the horizon.
 #### Arguments:
 `connID`: unique id of the connection
 #### Returns:
 Server id
 
 ### Add Worker
-```cpp
+```C++
 void JetHRW::AddWorkerServer(const FiveTuple& server)
 ```
-- Adds a worker server from the horizon.
+- Adds a worker server from the horizon (and removes it from the horizon set).
 - Caller must make sure that the added server is in the horizon set.
+- The added server should have been in the horizon set for a warmup period.
 #### Arguments:
 `server`: unique id of the server
 
@@ -103,7 +114,8 @@ void JetHRW::AddWorkerServer(const FiveTuple& server)
 void JetHRW::RemoveWorkerServer(const FiveTuple& server)
 ```
 - Removes a worker server.
-- Server must be in the worker set.
+- The removed server must be in the worker set.
+- The removed server is _not_ added automatically to the horizon set. Caller may add it by calling `AddHorizonServer`.
 #### Arguments:
 `server`: String representning a unique id of the server
 
@@ -129,7 +141,9 @@ void JetHRW::RemoveHorizonServer(const FiveTuple& server)
 ```cpp
 void JetHRW::RemoveConnection(const FiveTuple& connID)
 ```
-Stop tracking a connection (e.g., upon FIN)
+- Stop tracking a connection (e.g., upon FIN).
+- This deletes the connection information from the connection tracking module (if it was tracked).
+- This implementation does _not_ employ any eviction policy. Caller must remove stale connections explicitly.
 #### Arguments:
 `connID`: String representning a unique id of the connection
   
