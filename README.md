@@ -2,7 +2,7 @@
 
 JET is am algorithmic framework for hash-based stateful load balancers that uses much smaller connection tracking tables (typically a about 10% of full connection tracking). It is described in our paper:
 
-[Load Balancing with JET: Just Enough Tracking for Connection Consistency](FIXME)
+[Load Balancing with JET: Just Enough Tracking for Connection Consistency](https://doi.org/10.1145/3485983.3494851)
 
 **Paper Abstract:** Hash-based stateful load-balancers employ connection tracking to avoid per-connection consistency (PCC) violations that lead to broken connections. In this paper, we propose Just Enough Tracking (JET), a new algorithmic framework that significantly reduces the size of the connection tracking tables without increasing PCC violations.
 
@@ -83,7 +83,7 @@ This repository contains the code used to create the figures for the evaluation 
    - To create the synthetic traces
      ```bash
      make
-     bash gentzipf_bash
+     bash genzipf_bash
      ```
    
 3. Reproduce figure 6b
